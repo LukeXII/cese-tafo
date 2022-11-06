@@ -1,7 +1,7 @@
-/* Copyright 2022, Juan Manuel Cruz.
+/* Copyright 2022, Lucas Constantino
  * All rights reserved.
  *
- * This file is part of Project => freertos_book_Example4_6
+ * This file is part of Project => Tester para Amplificador Optico
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,7 +33,7 @@
 
 /*--------------------------------------------------------------------*-
 
-    taskLed.h (Released 2022-05)
+    taskDisplay.h (Released 2022-05)
 
   --------------------------------------------------------------------
 
@@ -42,8 +42,8 @@
 -*--------------------------------------------------------------------*/
 
 
-#ifndef __TASKLED_H
-#define __TASKLED_H
+#ifndef __TASKDISPLAY_H
+#define __TASKDISPLAY_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -65,7 +65,7 @@ typedef struct
 }
 #endif
 
-#endif /* __TASKLED_H */
+#endif /* __TASKDISPLAY_H */
 
 /*------------------------------------------------------------------*-
   ---- END OF FILE -------------------------------------------------

@@ -1,7 +1,7 @@
-/* Copyright 2020, Juan Manuel Cruz.
+/* Copyright 2020, Lucas Constantino.
  * All rights reserved.
  *
- * This file is part of Project => freertos_book_Example6_6
+ * This file is part of Project => Tester para Amplificador Optico
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,7 +34,7 @@
 
 /*--------------------------------------------------------------------*-
 
-    taskLed.c (Released 2022-05)
+    taskDisplay.c (Released 2022-05)
 
 --------------------------------------------------------------------
 
@@ -55,12 +55,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <taskDisplay.h>
 
 /* Demo includes. */
 #include "supportingFunctions.h"
 
 /* Application includes. */
-#include "taskLed.h"
+#include "API_LCD.h"
 
 #if( TASKS_SCOPE == TASKS_OUTSIDE_MAIN)
 // ------ Private constants ----------------------------------------
@@ -68,15 +69,12 @@
 /* Define the strings that will be passed in as the Supporting Functions parameters.
  * These are defined const and off the stack to ensure they remain valid when the
  * tasks are executing. */
-const char *pcTextForTask_LDXTOn		= "    - LDX turn On \r\n";
-const char *pcTextForTask_LDXTOff		= "    - LDX turn Off\r\n";
-const char *pcTextForTask_BinSemTaken	= "    - Binary Semaphore was taken\r\n";
+const char *pcTextForTask_LDXTOn	= "    - LDX turn On \r\n";
+const char *pcTextForTask_LDXTOff	= "    - LDX turn Off\r\n";
 
-#define			ledTickCntMAX		250
+#define	ledTickCntMAX	1000
 
-LDX_Config_t	LDX_Config[] 	= { { LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET, NotBlinking, 0 },
-							  	    { LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET, NotBlinking, 0 }, \
-									{ LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET, NotBlinking, 0 } };
+LDX_Config_t	LDX_Config[3];
 
 // ------ Public variables -----------------------------------------
 extern SemaphoreHandle_t mutexSemaphoreHandle;
@@ -84,58 +82,45 @@ extern ledFlag_t ledBlinkingFlag;
 // ------ Public functions prototypes ------------------------------
 
 /* Task Led thread */
-void vTaskLed( void const * argument );
+void vTaskRefreshDisplay( void const * argument );
 
 // ------ Public functions -----------------------------------------
 
 /*------------------------------------------------------------------*/
 /* Task Led thread */
-void vTaskLed( void const * argument )
+void vTaskRefreshDisplay( void const * argument )
 {
 	/*  Declare & Initialize Task Function variables for argument, led, button and task */
 	LDX_Config_t * ptr = (LDX_Config_t *) argument;
-
+	uint32_t cont = 0;
+	char var[4];
 	uint32_t xLastWakeTime;
 
-	/* The xLastWakeTime variable needs to be initialized with the current tick
-	   count. ws*/
+	/* The xLastWakeTime variable needs to be initialized with the current tick count. */
 	xLastWakeTime = osKernelSysTick();
 
 	char *pcTaskName = ( char * ) pcTaskGetName( NULL );
 
 	/* Print out the name of this task. */
-	vPrintTwoStrings(pcTaskName, "   - is running\r\n" );
+	vPrintTwoStrings(pcTaskName, " is running\r\n" );
 
     /* As per most tasks, this task is implemented in an infinite loop. */
 	for( ;; )
 	{
-		/* Check Led Flag */
-		if( ptr->ledFlag == Blinking )
-		{
-			/* Check, Update and Print Led State */
-		   	if( ptr->ledState == GPIO_PIN_RESET)
-		   	{
-		   		ptr->ledState = GPIO_PIN_SET;
-            	vPrintTwoStrings( pcTaskName, pcTextForTask_LDXTOn );
-		   	}
-	    	else
-	    	{
-	    		ptr->ledState = GPIO_PIN_RESET;
-            	vPrintTwoStrings( pcTaskName, pcTextForTask_LDXTOff );
-		   	}
-			/* Update HW Led State */
-		   	HAL_GPIO_WritePin( ptr->LDX_GPIO_Port, ptr->LDX_Pin, ptr->ledState );
-		}
 
 		/* Check Binary Semaphore */
-		xSemaphoreTake( mutexSemaphoreHandle, portMAX_DELAY );
-		{
-        	/* Check, Update and Print Led Flag */
-			ptr->ledFlag = ledBlinkingFlag;
-        	vPrintTwoStrings( pcTaskName, pcTextForTask_BinSemTaken );
-		}
-		xSemaphoreGive(mutexSemaphoreHandle);
+//		xSemaphoreTake( mutexSemaphoreHandle, portMAX_DELAY );
+//		{
+//        	vPrintTwoStrings( pcTaskName, pcTextForTask_BinSemTaken );
+//		}
+//		xSemaphoreGive(mutexSemaphoreHandle);
 		/* We want this task to execute exactly every 250 milliseconds. */
+
+		itoa(cont, var, 10);
+		LCD_Draw_Text(var, 80, 120, BLACK, 5, RED);
+
+//		cont++;
+
 		osDelayUntil( &xLastWakeTime, ledTickCntMAX );
 
 	}

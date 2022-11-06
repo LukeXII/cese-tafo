@@ -55,12 +55,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <taskDisplay.h>
 
 /* Demo includes. */
 #include "supportingFunctions.h"
 
 /* Application includes. */
-#include "taskLed.h"
 #include "taskButton.h"
 
 #if( TASKS_SCOPE == TASKS_OUTSIDE_MAIN)
@@ -90,7 +90,7 @@ void vTaskButton( void const * argument );
 void vTaskButton( void const * argument )
 {
 	/*  Declare & Initialize Task Function variables for argument, led, button and task */
-	static ledFlag_t lValueToSend = NotBlinking;
+//	static ledFlag_t lValueToSend = NotBlinking;
 
 	char *pcTaskName = ( char * ) pcTaskGetName( NULL );
 
