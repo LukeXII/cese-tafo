@@ -55,13 +55,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <taskDisplay.h>
+#include <taskApp.h>
+//#include <taskDisplay.h>
 
 /* Demo includes. */
 #include "supportingFunctions.h"
 
 /* Application includes. */
-#include "taskButton.h"
+#include "FSM.h"
 
 #if( TASKS_SCOPE == TASKS_OUTSIDE_MAIN)
 // ------ Private constants ----------------------------------------
@@ -69,19 +70,17 @@
 /* Define the strings that will be passed in as the Supporting Functions parameters.
  * These are defined const and off the stack to ensure they remain valid when the
  * tasks are executing. */
-const char *pcTextForTask_BlinkingOn	= " - Blinking turn On \r\n";
-const char *pcTextForTask_BlinkingOff	= " - Blinking turn Off\r\n";
 const char *pcTextForTask_BinSemGiven	= " - Binary Semaphore was given\r\n";
 
 #define 		buttonTickCntMAX	250
 
 // ------ Public variables -----------------------------------------
 extern SemaphoreHandle_t mutexSemaphoreHandle;
-extern ledFlag_t ledBlinkingFlag;
 // ------ Public functions prototypes ------------------------------
 
 /* Task Button thread */
 void vTaskButton( void const * argument );
+static FSMEvent_t eventGenerator(void);
 
 // ------ Public functions -----------------------------------------
 
@@ -89,10 +88,12 @@ void vTaskButton( void const * argument );
 /* Task Button thread */
 void vTaskButton( void const * argument )
 {
-	/*  Declare & Initialize Task Function variables for argument, led, button and task */
 //	static ledFlag_t lValueToSend = NotBlinking;
 
-	char *pcTaskName = ( char * ) pcTaskGetName( NULL );
+	FSMEvent_t newEvent;
+	char *pcTaskName = (char *)pcTaskGetName( NULL );
+
+	FSM_Init();
 
 	/* Print out the name of this task. */
 	vPrintTwoStrings(pcTaskName, "- is running\r\n" );
@@ -100,22 +101,15 @@ void vTaskButton( void const * argument )
 	/* As per most tasks, this task is implemented in an infinite loop. */
 	for( ;; )
 	{
+
+		newEvent = eventGenerator();
+		FSM_Update(newEvent);
+
 		/* Check HW Button State */
 		if( HAL_GPIO_ReadPin(USER_Btn_GPIO_Port, USER_Btn_Pin) == GPIO_PIN_SET )
 		{
 			xSemaphoreTake( mutexSemaphoreHandle, portMAX_DELAY );
 			{
-				/* Check, Update and Print Led Flag */
-				if( ledBlinkingFlag == NotBlinking )
-				{
-					ledBlinkingFlag = Blinking;
-					vPrintTwoStrings( pcTaskName, pcTextForTask_BlinkingOn );
-				}
-				else
-				{
-					ledBlinkingFlag = NotBlinking;
-					vPrintTwoStrings( pcTaskName, pcTextForTask_BlinkingOff );
-				}
 				/* 'Give' the semaphore to unblock the task. */
 				vPrintTwoStrings( pcTaskName, pcTextForTask_BinSemGiven );
 			}
@@ -126,6 +120,15 @@ void vTaskButton( void const * argument )
 		osDelay( buttonTickCntMAX );
 	}
 }
+
+FSMEvent_t eventGenerator(void)
+{
+	FSMEvent_t newEvent = NO_EVENT;
+
+
+	return newEvent;
+}
+
 #endif
 
 /*------------------------------------------------------------------*-

@@ -25,14 +25,15 @@
 /* Standard includes. */
 #include <stdio.h>
 #include <stdlib.h>
+#include <taskApp.h>
 #include <taskDisplay.h>
 
 /* Demo includes. */
 #include "supportingFunctions.h"
 
 /* Application includes. */
-#include "taskButton.h"
 #include "API_LCD.h"
+#include "XPT2046.h"
 
 /* USER CODE END Includes */
 
@@ -55,8 +56,6 @@
 ADC_HandleTypeDef hadc2;
 ADC_HandleTypeDef hadc3;
 
-SPI_HandleTypeDef hspi1;
-
 UART_HandleTypeDef huart3;
 
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
@@ -66,7 +65,7 @@ osThreadId TaskButtonHandle;
 /* USER CODE BEGIN PV */
 #if( TASKS_SCOPE == TASKS_OUTSIDE_MAIN)
 extern LDX_Config_t LDX_Config[];
-extern void vTaskRefreshDisplay(void const * argument);
+extern void vTaskDisplay(void const * argument);
 extern void vTaskButton(void const * argument);
 #endif
 
@@ -79,7 +78,6 @@ static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_ADC3_Init(void);
-static void MX_SPI1_Init(void);
 void vTaskLed_(void const * argument);
 void vTaskButton_(void const * argument);
 
@@ -132,10 +130,13 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   MX_ADC2_Init();
   MX_ADC3_Init();
-  MX_SPI1_Init();
+
+  XPT2046_SPIConfig();
 
   LCD_Config();
   LCD_Init();
+
+  XPT2046_setControllerConfig(RES_12BITS, MODE_DIFF, PD_LOWPOWER, 346);
   /* USER CODE BEGIN 2 */
 	/* Print out the name of this Example. */
 	vPrintString( pcTextForMain );
@@ -144,8 +145,8 @@ int main(void)
 	  /* Create the thread(s) */
 	  /* definition and creation of Task Led */
 	  ptr = &LDX_Config[0];
-	  osThreadDef(TaskRefreshDisplay, vTaskRefreshDisplay, osPriorityNormal, 0, 1000);
-	  TaskDisplayHandle = osThreadCreate(osThread(TaskRefreshDisplay), (void*) ptr);
+	  osThreadDef(TaskDisplay, vTaskDisplay, osPriorityNormal, 0, 1000);
+	  TaskDisplayHandle = osThreadCreate(osThread(TaskDisplay), (void*) ptr);
 
 	  /* Check the task was created successfully */
 	  configASSERT( TaskDisplayHandle != NULL );
@@ -359,44 +360,6 @@ static void MX_ADC3_Init(void)
   /* USER CODE BEGIN ADC3_Init 2 */
 
   /* USER CODE END ADC3_Init 2 */
-
-}
-
-/**
-  * @brief SPI1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI1_Init(void)
-{
-
-  /* USER CODE BEGIN SPI1_Init 0 */
-
-  /* USER CODE END SPI1_Init 0 */
-
-  /* USER CODE BEGIN SPI1_Init 1 */
-
-  /* USER CODE END SPI1_Init 1 */
-  /* SPI1 parameter configuration*/
-  hspi1.Instance = SPI1;
-  hspi1.Init.Mode = SPI_MODE_MASTER;
-  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
-  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi1.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI1_Init 2 */
-
-  /* USER CODE END SPI1_Init 2 */
 
 }
 

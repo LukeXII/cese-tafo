@@ -62,6 +62,7 @@
 
 /* Application includes. */
 #include "API_LCD.h"
+#include "XPT2046.h"
 
 #if( TASKS_SCOPE == TASKS_OUTSIDE_MAIN)
 // ------ Private constants ----------------------------------------
@@ -82,19 +83,21 @@ extern ledFlag_t ledBlinkingFlag;
 // ------ Public functions prototypes ------------------------------
 
 /* Task Led thread */
-void vTaskRefreshDisplay( void const * argument );
+void vTaskDisplay( void const * argument );
 
 // ------ Public functions -----------------------------------------
 
 /*------------------------------------------------------------------*/
 /* Task Led thread */
-void vTaskRefreshDisplay( void const * argument )
+void vTaskDisplay( void const * argument )
 {
 	/*  Declare & Initialize Task Function variables for argument, led, button and task */
 	LDX_Config_t * ptr = (LDX_Config_t *) argument;
 	uint32_t cont = 0;
 	char var[4];
 	uint32_t xLastWakeTime;
+	uint16_t xcoord, ycoord, pressure;
+	char str[10], str2[10];
 
 	/* The xLastWakeTime variable needs to be initialized with the current tick count. */
 	xLastWakeTime = osKernelSysTick();
@@ -108,6 +111,50 @@ void vTaskRefreshDisplay( void const * argument )
 	for( ;; )
 	{
 
+		xcoord = XPT2046_getCoord(COORD_X);
+		ycoord = XPT2046_getCoord(COORD_Y);
+		pressure = XPT2046_getPressure();
+
+		XPT2046_convertToPixelCoord(&xcoord, &ycoord);
+
+		LCD_Fill_Screen(RED);
+
+		sprintf(str, "%d", xcoord);
+		str2[0] = 'X';
+		str2[1] = ':';
+		str2[2] = '\0';
+
+		if(xcoord <= SCREEN_PIXELSIZE_X)
+			LCD_Draw_Text(strcat(str2, str), 20, 20, PURPLE, 4, CYAN);
+		else
+			LCD_Draw_Text(strcat(str2, "-"), 20, 20, PURPLE, 4, CYAN);
+
+		sprintf(str, "%d", ycoord);
+		str2[0] = 'Y';
+		str2[1] = ':';
+		str2[2] = '\0';
+
+		if(xcoord <= SCREEN_PIXELSIZE_Y)
+			LCD_Draw_Text(strcat(str2, str), 20, 50, PURPLE, 4, CYAN);
+		else
+			LCD_Draw_Text(strcat(str2, "-"), 20, 50, PURPLE, 4, CYAN);
+
+		sprintf(str, "%d", pressure);
+		str2[0] = 'P';
+		str2[1] = ':';
+		str2[2] = '\0';
+		LCD_Draw_Text(strcat(str2, str), 20, 80, PURPLE, 4, CYAN);
+
+		str2[0] = 'P';
+		str2[1] = 'E';
+		str2[2] = 'N';
+		str2[3] = ':';
+		str2[4] = '\0';
+		if(XPT2046_isPressed())
+			LCD_Draw_Text(strcat(str2, "SI"), 20, 110, PURPLE, 4, CYAN);
+		else
+			LCD_Draw_Text(strcat(str2, "NO"), 20, 110, PURPLE, 4, CYAN);
+
 		/* Check Binary Semaphore */
 //		xSemaphoreTake( mutexSemaphoreHandle, portMAX_DELAY );
 //		{
@@ -116,8 +163,8 @@ void vTaskRefreshDisplay( void const * argument )
 //		xSemaphoreGive(mutexSemaphoreHandle);
 		/* We want this task to execute exactly every 250 milliseconds. */
 
-		itoa(cont, var, 10);
-		LCD_Draw_Text(var, 80, 120, BLACK, 5, RED);
+//		itoa(cont, var, 10);
+//		LCD_Draw_Text(var, 80, 120, BLACK, 5, RED);
 
 //		cont++;
 
