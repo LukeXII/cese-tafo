@@ -155,6 +155,17 @@ void vTaskDisplay( void const * argument )
 		else
 			LCD_Draw_Text(strcat(str2, "NO"), 20, 110, PURPLE, 4, CYAN);
 
+//		switch()
+//		{
+//			case :
+//
+//			break;
+//
+//			case :
+//
+//			break;
+//		}
+
 		/* Check Binary Semaphore */
 //		xSemaphoreTake( mutexSemaphoreHandle, portMAX_DELAY );
 //		{

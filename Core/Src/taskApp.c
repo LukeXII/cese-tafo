@@ -63,6 +63,7 @@
 
 /* Application includes. */
 #include "FSM.h"
+#include "API_ADC.h"
 
 #if( TASKS_SCOPE == TASKS_OUTSIDE_MAIN)
 // ------ Private constants ----------------------------------------
@@ -72,31 +73,35 @@
  * tasks are executing. */
 const char *pcTextForTask_BinSemGiven	= " - Binary Semaphore was given\r\n";
 
-#define 		buttonTickCntMAX	250
+#define		buttonTickCntMAX			1000
 
 // ------ Public variables -----------------------------------------
 extern SemaphoreHandle_t mutexSemaphoreHandle;
 // ------ Public functions prototypes ------------------------------
 
 /* Task Button thread */
-void vTaskButton( void const * argument );
+void vTaskApp( void const * argument );
 static FSMEvent_t eventGenerator(void);
 
 // ------ Public functions -----------------------------------------
 
 /*------------------------------------------------------------------*/
 /* Task Button thread */
-void vTaskButton( void const * argument )
+void vTaskApp( void const * argument )
 {
 //	static ledFlag_t lValueToSend = NotBlinking;
 
 	FSMEvent_t newEvent;
 	char *pcTaskName = (char *)pcTaskGetName( NULL );
 
+	char dummy[8];
+
 	FSM_Init();
 
 	/* Print out the name of this task. */
 	vPrintTwoStrings(pcTaskName, "- is running\r\n" );
+
+	ADC_DMA_StartConversion();
 
 	/* As per most tasks, this task is implemented in an infinite loop. */
 	for( ;; )
@@ -105,18 +110,21 @@ void vTaskButton( void const * argument )
 		newEvent = eventGenerator();
 		FSM_Update(newEvent);
 
-		/* Check HW Button State */
-		if( HAL_GPIO_ReadPin(USER_Btn_GPIO_Port, USER_Btn_Pin) == GPIO_PIN_SET )
-		{
-			xSemaphoreTake( mutexSemaphoreHandle, portMAX_DELAY );
-			{
-				/* 'Give' the semaphore to unblock the task. */
-				vPrintTwoStrings( pcTaskName, pcTextForTask_BinSemGiven );
-			}
-			xSemaphoreGive( mutexSemaphoreHandle );
-		}
+//		if( HAL_GPIO_ReadPin(USER_Btn_GPIO_Port, USER_Btn_Pin) == GPIO_PIN_SET )
+//		{
+//			xSemaphoreTake( mutexSemaphoreHandle, portMAX_DELAY );
+//			{
+//				/* 'Give' the semaphore to unblock the task. */
+//				vPrintTwoStrings( pcTaskName, pcTextForTask_BinSemGiven );
+//			}
+//			xSemaphoreGive( mutexSemaphoreHandle );
+//		}
 
-		/* We want this task to execute every 250 milliseconds. */
+		vPrintTwoStrings(itoa(DEBUG_getValue(0), dummy, 10), " POS 0\r\n" );
+		vPrintTwoStrings(itoa(DEBUG_getValue(4), dummy, 10), " POS 1\r\n" );
+		vPrintTwoStrings(itoa(DEBUG_getValue(8), dummy, 10), " POS 2\r\n" );
+		vPrintTwoStrings(itoa(DEBUG_getValue(12), dummy, 10), " POS 3\r\n" );
+
 		osDelay( buttonTickCntMAX );
 	}
 }
