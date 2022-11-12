@@ -119,13 +119,12 @@ uint16_t DEBUG_getValue(uint8_t index)
 	return adc_dma_buffer[index];
 }
 
-
 float ADC_getChannelVoltage(uint8_t channelRank)
 {
 	uint32_t acc_value = 0;
 	uint8_t i;
 
-	if(channelRank < NUMBER_ADC_CHANNELS)
+	if(channelRank <= NUMBER_ADC_CHANNELS)
 	{
 		for(i = 0; i<NUMBER_SAMPLES_PER_CHANNEL; i++)
 			acc_value += adc_dma_buffer[channelRank - 1 + i*NUMBER_ADC_CHANNELS];

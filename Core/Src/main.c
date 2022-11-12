@@ -63,7 +63,7 @@ osThreadId TaskDisplayHandle;
 osThreadId TaskAppHandle;
 /* USER CODE BEGIN PV */
 #if( TASKS_SCOPE == TASKS_OUTSIDE_MAIN)
-extern LDX_Config_t LDX_Config[];
+extern DisplayData_t DisplayData;
 extern void vTaskDisplay(void const * argument);
 extern void vTaskApp(void const * argument);
 #endif
@@ -100,7 +100,7 @@ int main(void)
 	const char *pcTextForMain = "EDFA Tester is starting up\r\n\n";
 
 #if( TASKS_SCOPE == TASKS_OUTSIDE_MAIN)
-	LDX_Config_t* ptr;
+	DisplayData_t * ptrDisplayData;
 #endif
 
   /* USER CODE END 1 */
@@ -141,18 +141,17 @@ int main(void)
 
 #if( TASKS_SCOPE == TASKS_OUTSIDE_MAIN)
 	  /* Create the thread(s) */
-	  /* definition and creation of Task Led */
-	  ptr = &LDX_Config[0];
+	  /* definition and creation of Task Display */
+	  ptrDisplayData = &DisplayData;
 	  osThreadDef(TaskDisplay, vTaskDisplay, osPriorityNormal, 0, 1000);
-	  TaskDisplayHandle = osThreadCreate(osThread(TaskDisplay), (void*) ptr);
+	  TaskDisplayHandle = osThreadCreate(osThread(TaskDisplay), (void*) ptrDisplayData);
 
 	  /* Check the task was created successfully */
 	  configASSERT( TaskDisplayHandle != NULL );
 
-	  /* definition and creation of Task Button */
-	  ptr = &LDX_Config[0];
+	  /* definition and creation of Task App */
 	  osThreadDef(TaskApp, vTaskApp, osPriorityNormal, 0, 1000);
-	  TaskAppHandle = osThreadCreate(osThread(TaskApp), (void*) ptr);
+	  TaskAppHandle = osThreadCreate(osThread(TaskApp), (void*) ptrDisplayData);
 
 	  /* Check the task was created successfully */
 	  configASSERT( TaskAppHandle != NULL );

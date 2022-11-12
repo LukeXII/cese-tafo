@@ -71,6 +71,7 @@
 /* Define the strings that will be passed in as the Supporting Functions parameters.
  * These are defined const and off the stack to ensure they remain valid when the
  * tasks are executing. */
+DisplayData_t DisplayData;
 const char *pcTextForTask_BinSemGiven	= " - Binary Semaphore was given\r\n";
 
 #define		buttonTickCntMAX			1000
@@ -89,8 +90,7 @@ static FSMEvent_t eventGenerator(void);
 /* Task Button thread */
 void vTaskApp( void const * argument )
 {
-//	static ledFlag_t lValueToSend = NotBlinking;
-
+	DisplayData_t * ptrDisplayData = (DisplayData_t *) argument;
 	FSMEvent_t newEvent;
 	char *pcTaskName = (char *)pcTaskGetName( NULL );
 
@@ -112,18 +112,19 @@ void vTaskApp( void const * argument )
 
 //		if( HAL_GPIO_ReadPin(USER_Btn_GPIO_Port, USER_Btn_Pin) == GPIO_PIN_SET )
 //		{
-//			xSemaphoreTake( mutexSemaphoreHandle, portMAX_DELAY );
-//			{
-//				/* 'Give' the semaphore to unblock the task. */
-//				vPrintTwoStrings( pcTaskName, pcTextForTask_BinSemGiven );
-//			}
-//			xSemaphoreGive( mutexSemaphoreHandle );
+		xSemaphoreTake( mutexSemaphoreHandle, portMAX_DELAY );
+		{
+			ptrDisplayData->opticalInputPower = ADC_getChannelVoltage(1);
+			ptrDisplayData->edfaVoltage = ADC_getChannelVoltage(2);
+			ptrDisplayData->opticalOutputPower = ADC_getChannelVoltage(3);
+			ptrDisplayData->edfaCurrent = ADC_getChannelVoltage(4);
+		}
+		xSemaphoreGive( mutexSemaphoreHandle );
 //		}
 
-		vPrintTwoStrings(itoa(DEBUG_getValue(0), dummy, 10), " POS 0\r\n" );
-		vPrintTwoStrings(itoa(DEBUG_getValue(4), dummy, 10), " POS 1\r\n" );
-		vPrintTwoStrings(itoa(DEBUG_getValue(8), dummy, 10), " POS 2\r\n" );
-		vPrintTwoStrings(itoa(DEBUG_getValue(12), dummy, 10), " POS 3\r\n" );
+//		vPrintTwoStrings(itoa((uint16_t)ADC_getChannelVoltage(1), dummy, 10), " PROMEDIO\r\n" );
+
+
 
 		osDelay( buttonTickCntMAX );
 	}

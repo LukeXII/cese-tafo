@@ -1,7 +1,7 @@
-/* Copyright 2022, Juan Manuel Cruz.
+/* Copyright 2022, Lucas Constantino
  * All rights reserved.
  *
- * This file is part of Project => freertos_book_Example4_6
+ * This file is part of Project => cese-tafo
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,7 +33,7 @@
 
 /*--------------------------------------------------------------------*-
 
-    taskButton.h (Released 2022-05)
+    taskApp.h (Released 2022-10)
 
   --------------------------------------------------------------------
 
@@ -42,8 +42,8 @@
 -*--------------------------------------------------------------------*/
 
 
-#ifndef __TASKBUTTON_H
-#define __TASKBUTTON_H
+#ifndef __TASKAPP_H
+#define __TASKAPP_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -51,11 +51,21 @@
 
 // ------ Public variable  -----------------------------------------
 
+ typedef struct
+{
+	float			edfaCurrent;
+	float			edfaVoltage;
+	float			opticalInputPower;
+	float			opticalOutputPower;
+ 	GPIO_PinState	ledState;
+// 	FSM_State		fsmstate;
+} DisplayData_t;
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __TASKBUTTON_H */
+#endif /* __TASKAPP_H */
 
 /*------------------------------------------------------------------*-
   ---- END OF FILE -------------------------------------------------
